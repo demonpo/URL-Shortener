@@ -1,0 +1,17 @@
+version: '3'
+
+dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
+
+tasks:
+  build:
+    cmds:
+      - go build -o app ./src/app.go
+  db:create-migration:
+    cmds:
+      - source load-envs && atlas migrate diff --env gorm
+  db:migrate:
+    cmds:
+      - source load-envs && echo $DATABASE_URL && atlas migrate apply --env gorm
+  install-atlas:
+    cmds:
+      - curl -sSf https://atlasgo.sh | sh
