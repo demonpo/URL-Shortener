@@ -3,7 +3,8 @@ package server
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"goHexBoilerplate/src/modules/user/application/rest/handlers"
+	shortenerHandlers "goHexBoilerplate/src/modules/shortener/application/rest/handlers"
+	userHandlers "goHexBoilerplate/src/modules/user/application/rest/handlers"
 	"goHexBoilerplate/src/shared/contracts/server"
 	"goHexBoilerplate/src/shared/infra/fx"
 )
@@ -11,12 +12,13 @@ import (
 type GinServer struct {
 	Router *gin.Engine
 	server.AbstractServer
-	UserHandler *handlers.UserHandler
+	UserHandler      *userHandlers.UserHandler
+	ShortenerHandler *shortenerHandlers.ShortenerHandler
 }
 
-func NewGinServer(config fx.AppConfig, userHandler *handlers.UserHandler) *GinServer {
+func NewGinServer(config fx.AppConfig, userHandler *userHandlers.UserHandler, shortenerHandlers *shortenerHandlers.ShortenerHandler) *GinServer {
 	fmt.Println("Hello, World!")
-	serv := GinServer{Router: gin.Default(), AbstractServer: server.AbstractServer{Port: config.Port}, UserHandler: userHandler}
+	serv := GinServer{Router: gin.Default(), AbstractServer: server.AbstractServer{Port: config.Port}, UserHandler: userHandler, ShortenerHandler: shortenerHandlers}
 	serv.AbstractServer.Server = &serv
 	return &serv
 }
@@ -38,8 +40,13 @@ func (server *GinServer) Listen() {
 
 func (server *GinServer) setAppHandlers(router *gin.Engine) {
 	v1 := router.Group("/v1")
+	// Users
 	v1.GET("/users/:id", server.UserHandler.ReadUser)
 	v1.POST("/users", server.UserHandler.CreateUser)
+	// Shortener
+	v1.GET("/s/:id", server.ShortenerHandler.Redirect)
+	v1.POST("/shortener", server.ShortenerHandler.Create)
+	// Test
 	v1.GET("/test", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "OK"})
 	})

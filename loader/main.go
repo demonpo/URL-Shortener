@@ -1,16 +1,16 @@
 package main
 
 import (
+	"ariga.io/atlas-provider-gorm/gormschema"
 	"fmt"
+	shortenerEntitiesInfra "goHexBoilerplate/src/modules/shortener/infra/entities"
+	userEntitiesInfra "goHexBoilerplate/src/modules/user/infra/entities"
 	"io"
 	"os"
-
-	"ariga.io/atlas-provider-gorm/gormschema"
-	entitiesInfra "goHexBoilerplate/src/modules/user/infra/entities"
 )
 
 func main() {
-	stmts, err := gormschema.New("postgres").Load(&entitiesInfra.User{})
+	stmts, err := gormschema.New("postgres").Load(&userEntitiesInfra.User{}, shortenerEntitiesInfra.Shortener{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to load gorm schema: %v\n", err)
 		os.Exit(1)

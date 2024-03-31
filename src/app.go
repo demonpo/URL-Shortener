@@ -4,10 +4,14 @@ import (
 	"github.com/joho/godotenv"
 	"go.uber.org/fx"
 	"goHexBoilerplate/src/db"
-	"goHexBoilerplate/src/modules/user/application/rest/handlers"
-	domainRepositories "goHexBoilerplate/src/modules/user/domain/contracts/repositories"
-	"goHexBoilerplate/src/modules/user/domain/services"
-	"goHexBoilerplate/src/modules/user/infra/repositories"
+	shortenerHandlers "goHexBoilerplate/src/modules/shortener/application/rest/handlers"
+	shortenerDomainRepositories "goHexBoilerplate/src/modules/shortener/domain/contracts/repositories"
+	shortenerServices "goHexBoilerplate/src/modules/shortener/domain/services"
+	shortenerRepositories "goHexBoilerplate/src/modules/shortener/infra/repositories"
+	userHandlers "goHexBoilerplate/src/modules/user/application/rest/handlers"
+	userDomainRepositories "goHexBoilerplate/src/modules/user/domain/contracts/repositories"
+	userServices "goHexBoilerplate/src/modules/user/domain/services"
+	userRepositories "goHexBoilerplate/src/modules/user/infra/repositories"
 	"goHexBoilerplate/src/shared/contracts"
 	domainServer "goHexBoilerplate/src/shared/contracts/server"
 	infraFx "goHexBoilerplate/src/shared/infra/fx"
@@ -23,12 +27,21 @@ func main() {
 		fx.Provide(
 			func() infraFx.AppConfig { return infraFx.AppConfig{Port: 3000} },
 			db.NewDB,
+			// Repositories
 			fx.Annotate(
-				repositories.NewPostgresUserRepository,
-				fx.As(new(domainRepositories.UserRepository)),
+				userRepositories.NewPostgresUserRepository,
+				fx.As(new(userDomainRepositories.UserRepository)),
 			),
-			services.NewUserService,
-			handlers.NewUserHandler,
+			fx.Annotate(
+				shortenerRepositories.NewPostgresShortenerRepository,
+				fx.As(new(shortenerDomainRepositories.ShortenerRepository)),
+			),
+			// Services
+			userServices.NewUserService,
+			shortenerServices.NewShortenerService,
+			// Handlers
+			userHandlers.NewUserHandler,
+			shortenerHandlers.NewShortenerHandler,
 			infraFx.NewApp,
 			fx.Annotate(
 				server.NewGinServer,
