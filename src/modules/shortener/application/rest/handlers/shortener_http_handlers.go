@@ -6,7 +6,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"goHexBoilerplate/src/modules/shortener/application/rest/schemas"
 	"goHexBoilerplate/src/modules/shortener/domain/services"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type ShortenerHandler struct {
@@ -61,5 +63,39 @@ func (h *ShortenerHandler) Redirect(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Redirect(http.StatusFound, shortener.Url)
+	userAgent := ctx.GetHeader("User-Agent")
+
+	if isBrowserUserAgent(userAgent) {
+		ctx.Redirect(http.StatusFound, shortener.Url)
+		return
+	}
+
+	// Fetch the content of the URL
+	resp, err := http.Get(shortener.Url)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Failed to fetch URL content")
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Failed to read URL content")
+		return
+	}
+
+	// Return the HTML content as a string
+	ctx.String(http.StatusOK, string(body))
+
+}
+
+func isBrowserUserAgent(userAgent string) bool {
+	validUserAgents := []string{"Mozilla", "Chrome", "Safari", "Opera", "IE", "Edge"}
+	for _, ua := range validUserAgents {
+		if strings.Contains(userAgent, ua) {
+			return true
+		}
+	}
+	return false
 }
