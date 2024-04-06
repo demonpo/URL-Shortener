@@ -4,21 +4,24 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	analyticsServices "goHexBoilerplate/src/modules/analytics/domain/services"
 	"goHexBoilerplate/src/modules/shortener/application/rest/schemas"
-	"goHexBoilerplate/src/modules/shortener/domain/services"
+	shortenerServices "goHexBoilerplate/src/modules/shortener/domain/services"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
 type ShortenerHandler struct {
-	shortenerService *services.ShortenerService
+	shortenerService *shortenerServices.ShortenerService
+	clickService     *analyticsServices.ClickService
 }
 
-func NewShortenerHandler(shortenerService *services.ShortenerService) *ShortenerHandler {
+func NewShortenerHandler(shortenerService *shortenerServices.ShortenerService, clickService *analyticsServices.ClickService) *ShortenerHandler {
 	fmt.Println("NewShortenerHandler")
 	return &ShortenerHandler{
 		shortenerService: shortenerService,
+		clickService:     clickService,
 	}
 }
 
@@ -40,7 +43,7 @@ func (h *ShortenerHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	newShortener, err := h.shortenerService.Create(services.CreateInput{
+	newShortener, err := h.shortenerService.Create(shortenerServices.CreateInput{
 		Url: shortener.Url,
 	})
 	if err != nil {
@@ -66,6 +69,12 @@ func (h *ShortenerHandler) Redirect(ctx *gin.Context) {
 	userAgent := ctx.GetHeader("User-Agent")
 
 	if isBrowserUserAgent(userAgent) {
+		go func() {
+			h.clickService.Create(analyticsServices.CreateInput{
+				ShortenerId: shortener.Id,
+				UserAgent:   &userAgent,
+			})
+		}()
 		ctx.Redirect(http.StatusFound, shortener.Url)
 		return
 	}

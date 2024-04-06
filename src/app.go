@@ -4,6 +4,9 @@ import (
 	"github.com/joho/godotenv"
 	"go.uber.org/fx"
 	"goHexBoilerplate/src/db"
+	analyticsDomainRepositories "goHexBoilerplate/src/modules/analytics/domain/contracts/repositories"
+	analyticsServices "goHexBoilerplate/src/modules/analytics/domain/services"
+	analyticsRepositories "goHexBoilerplate/src/modules/analytics/infra/repositories"
 	shortenerHandlers "goHexBoilerplate/src/modules/shortener/application/rest/handlers"
 	shortenerDomainRepositories "goHexBoilerplate/src/modules/shortener/domain/contracts/repositories"
 	shortenerServices "goHexBoilerplate/src/modules/shortener/domain/services"
@@ -36,9 +39,14 @@ func main() {
 				shortenerRepositories.NewPostgresShortenerRepository,
 				fx.As(new(shortenerDomainRepositories.ShortenerRepository)),
 			),
+			fx.Annotate(
+				analyticsRepositories.NewPostgresClickRepository,
+				fx.As(new(analyticsDomainRepositories.ClickRepository)),
+			),
 			// Services
 			userServices.NewUserService,
 			shortenerServices.NewShortenerService,
+			analyticsServices.NewClickService,
 			// Handlers
 			userHandlers.NewUserHandler,
 			shortenerHandlers.NewShortenerHandler,
