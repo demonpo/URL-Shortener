@@ -67,12 +67,16 @@ func (h *ShortenerHandler) Redirect(ctx *gin.Context) {
 	}
 
 	userAgent := ctx.GetHeader("User-Agent")
+	ip := ctx.ClientIP()
+	referer := ctx.Request.Header.Get("Referer")
 
 	if isBrowserUserAgent(userAgent) {
 		go func() {
 			h.clickService.Create(analyticsServices.CreateInput{
 				ShortenerId: shortener.Id,
 				UserAgent:   &userAgent,
+				UserIp:      &ip,
+				ReferrerUrl: &referer,
 			})
 		}()
 		ctx.Redirect(http.StatusFound, shortener.Url)
