@@ -23,13 +23,6 @@ func NewGinServer(config fx.AppConfig, userHandler *userHandlers.UserHandler, sh
 	return &serv
 }
 
-//func NewGinServer(port int, userHandler handler.UserHandler) *GinServer {
-//	fmt.Println("Hello, World2!")
-//	server := GinServer{gin.Default(), server.AbstractServer{Port: port}, userHandler}
-//	server.AbstractServer.Server = &server
-//	return &server
-//}
-
 func (server *GinServer) Listen() {
 	server.setAppHandlers(server.Router)
 	err := server.Router.Run(fmt.Sprintf(":%d", server.Port))
@@ -40,9 +33,6 @@ func (server *GinServer) Listen() {
 
 func (server *GinServer) setAppHandlers(router *gin.Engine) {
 	v1 := router.Group("/v1")
-	// Users
-	v1.GET("/users/:id", server.UserHandler.ReadUser)
-	v1.POST("/users", server.UserHandler.CreateUser)
 	// Shortener
 	v1.GET("/s/:id", server.ShortenerHandler.Redirect)
 	v1.POST("/shortener", server.ShortenerHandler.Create)
