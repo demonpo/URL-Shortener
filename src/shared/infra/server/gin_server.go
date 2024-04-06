@@ -34,7 +34,7 @@ func (server *GinServer) Listen() {
 func (server *GinServer) setAppHandlers(router *gin.Engine) {
 	v1 := router.Group("/v1")
 	// Shortener
-	v1.GET("/s/:id", server.ShortenerHandler.Redirect)
+	router.GET("/s/:id", server.ShortenerHandler.Redirect)
 	v1.POST("/shortener", server.ShortenerHandler.Create)
 	// Test
 	v1.GET("/test", func(c *gin.Context) {
