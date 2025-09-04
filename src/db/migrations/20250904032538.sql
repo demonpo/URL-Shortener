@@ -1,3 +1,17 @@
+-- Create "clicks" table
+CREATE TABLE "public"."clicks" (
+  "id" bigserial NOT NULL,
+  "created_at" timestamptz NULL,
+  "updated_at" timestamptz NULL,
+  "deleted_at" timestamptz NULL,
+  "shortener_id" text NULL,
+  "user_ip" text NULL,
+  "referrer_url" text NULL,
+  "user_agent" text NULL,
+  PRIMARY KEY ("id")
+);
+-- Create index "idx_clicks_deleted_at" to table: "clicks"
+CREATE INDEX "idx_clicks_deleted_at" ON "public"."clicks" ("deleted_at");
 -- Create "shorteners" table
 CREATE TABLE "public"."shorteners" (
   "id" text NOT NULL,
@@ -17,9 +31,8 @@ CREATE TABLE "public"."users" (
   "deleted_at" timestamptz NULL,
   "name" text NULL,
   "email" text NULL,
-  PRIMARY KEY ("id")
+  PRIMARY KEY ("id"),
+  CONSTRAINT "uni_users_email" UNIQUE ("email")
 );
 -- Create index "idx_users_deleted_at" to table: "users"
 CREATE INDEX "idx_users_deleted_at" ON "public"."users" ("deleted_at");
--- Create index "uni_users_email" to table: "users"
-CREATE UNIQUE INDEX "uni_users_email" ON "public"."users" ("email");
