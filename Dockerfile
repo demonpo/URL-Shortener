@@ -5,8 +5,8 @@ RUN go mod download
 RUN go mod tidy
 
 # Utils
-RUN go install github.com/go-task/task/v3/cmd/task@latest
-RUN go install github.com/air-verse/air@latest
+RUN go install github.com/go-task/task/v3/cmd/task@latest \
+    && go install github.com/air-verse/air@latest
 
 # Build
 RUN task build
