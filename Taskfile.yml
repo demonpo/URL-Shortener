@@ -6,6 +6,14 @@ tasks:
   build:
     cmds:
       - go build -o app ./src/app.go
+  build:image:prod:
+    desc: Build production image using Dockerfile.prod and production ignore file
+    cmds:
+      - docker build -f Dockerfile.prod --ignorefile .dockerignore.prod -t url-shortener:prod .
+  build:image:prod-nc:
+    desc: Build production image without cache
+    cmds:
+      - docker build --no-cache -f Dockerfile.prod --ignorefile .dockerignore.prod -t url-shortener:prod .
   db:create-migration:
     cmds:
       - source load-envs && atlas migrate diff --env gorm

@@ -1,0 +1,53 @@
+ARG GO_VERSION=1.24
+
+#############################
+# Builder Stage
+#############################
+FROM golang:${GO_VERSION}-alpine AS builder
+WORKDIR /src
+
+# Enable Go modules & caching
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+
+# Install build tools (only if ever needed). Currently none required besides git (already in alpine image with --no-cache install)
+RUN apk add --no-cache ca-certificates git && update-ca-certificates
+
+# Pre-copy go mod files for better layer caching
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download && go mod verify
+
+# Copy app source
+COPY . .
+
+# Build binary (trim path + strip symbols for smaller size)
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    go build -trimpath -ldflags="-s -w" -o /out/app ./src/app.go
+
+#############################
+# Runtime Stage (with automated migrations)
+#############################
+FROM alpine:3.20 AS runtime
+
+# Install minimal deps + atlas CLI
+RUN apk add --no-cache ca-certificates curl && update-ca-certificates \
+    && curl -sSf https://atlasgo.sh | sh -s -- -b /usr/local/bin
+
+# Non-root user
+RUN adduser -D -u 10001 appuser
+
+# Copy binary and migrations
+COPY --from=builder /out/app /app
+COPY src/db/migrations /migrations
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh /app
+
+ENV MIGRATIONS_DIR=/migrations \
+    MIGRATIONS_APPLY=1
+
+EXPOSE 3000
+
+USER appuser
+
+ENTRYPOINT ["/entrypoint.sh"]

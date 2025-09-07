@@ -1,0 +1,38 @@
+# Development docker ignore (lighter; prod uses .dockerignore.prod)
+
+# VCS
+.git
+.gitignore
+
+# Build / cache artifacts
+app
+out
+bin
+dist
+coverage
+*.coverprofile
+
+# Local env & secrets (still exclude)
+.env
+.env.*
+!example.env
+
+# IDE/editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Temp
+.tmp
+tmp/
+
+# Go build cache dir (optional to send)
+/go/pkg/mod
+
+# Keep docs & atlas files available in dev (not ignored)
+# Keep tests in dev context

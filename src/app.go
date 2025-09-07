@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"go.uber.org/fx"
 	"goHexBoilerplate/src/db"
@@ -22,9 +23,8 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("[warn] .env file not found or could not be loaded; continuing with existing environment variables")
 	}
 	fx.New(
 		fx.Provide(

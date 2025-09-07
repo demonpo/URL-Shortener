@@ -1,0 +1,52 @@
+# Production-specific docker ignore (lean context)
+# Derived from the previous .dockerignore
+
+# VCS
+.git
+.gitignore
+
+# Build / cache artifacts
+app
+out
+bin
+dist
+coverage
+*.coverprofile
+
+# Local env & secrets
+.env
+.env.*
+!example.env
+
+# IDE/editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Modules cache (not needed in context)
+/go/pkg/mod
+
+# Tests & mocks (skip for prod image)
+**/*_test.go
+src/modules/**/test/
+
+# Docs and configs not needed in final binary build
+README.md
+Readme.md
+atlas.hcl
+load-envs
+
+# Docker related extra files
+Dockerfile
+Dockerfile.dev
+Dockerfile.development
+
+# Misc temp
+.tmp
+tmp/
+
